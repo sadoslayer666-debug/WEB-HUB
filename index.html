@@ -407,31 +407,53 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Global Dynamic Environment Config detection
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'webhub-global-sync-v1';
-        
-        // Auto-detect Firebase environment config or dynamically initialize cloud workspace
-        let firebaseConfig;
-        if (typeof __firebase_config !== 'undefined') {
-            try { firebaseConfig = JSON.parse(__firebase_config); } catch(e){}
-        }
-        
-        // Fallback for custom GitHub Pages deployments
-        if (!firebaseConfig || !firebaseConfig.projectId) {
-            const firebaseConfig = {
-  apiKey: "AIzaSyCStZAxdOTa7v4zGxCJxzoQO8ohHThmmmg",
-  authDomain: "web-hub-5f37b.firebaseapp.com",
-  projectId: "web-hub-5f37b",
-  storageBucket: "web-hub-5f37b.firebasestorage.app",
-  messagingSenderId: "855921179660",
-  appId: "1:855921179660:web:9ad832586672061fd30229",
-  measurementId: "G-790Y8GR27Y"
-};
-        }
+        // Firebase Configuration for the standalone WEBHUB deployment.
+        // Use this project's explicit config so an injected placeholder config
+        // cannot silently override the real Firebase API key.
+        const appId = 'webhub-projects-default';
+        const firebaseConfig = {
+            apiKey: "AIzaSyCStZAxdOTa7v4zGxCJxzoQO8ohHThmmmg",
+            authDomain: "web-hub-5f37b.firebaseapp.com",
+            projectId: "web-hub-5f37b",
+            storageBucket: "web-hub-5f37b.firebasestorage.app",
+            messagingSenderId: "855921179660",
+            appId: "1:855921179660:web:9ad832586672061fd30229",
+            measurementId: "G-790Y8GR27Y"
+        };
 
-        let app, auth, db;
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
         let currentUser = null;
         let isCloudConnected = false;
+
+        // Initialize Authentication
+        async function initAuth() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) {
+                console.warn("Auth initialization error, using local fallback mode:", err);
+                updateSyncUI(false, "Local Mode");
+            }
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) {
+                // Authentication alone does not prove Firestore is reachable.
+                isCloudConnected = false;
+                updateSyncUI(false, "Checking Cloud...");
+                subscribeToProjects();
+            } else {
+                isCloudConnected = false;
+                updateSyncUI(false, "Offline");
+            }
+        });
 
         function updateSyncUI(online, statusText) {
             const dot = document.getElementById('syncDot');
@@ -449,49 +471,11 @@
             }
         }
 
-        // Initialize Authentication & Firestore with safety checks
-        async function initAuth() {
-            try {
-                app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
-                db = getFirestore(app);
-
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (err) {
-                console.warn("Cloud connection limited to local store fallback:", err);
-                // If cloud connection fails (e.g. key domain restriction), seamless local mode handles state
-                updateSyncUI(false, "Local Mode");
-            }
-        }
-
-        if (typeof initializeApp !== 'undefined') {
-            try {
-                initAuth();
-                
-                onAuthStateChanged(auth, (user) => {
-                    currentUser = user;
-                    if (user) {
-                        isCloudConnected = true;
-                        updateSyncUI(true, "Cloud Synced");
-                        subscribeToProjects();
-                    } else {
-                        updateSyncUI(false, "Local Mode");
-                    }
-                });
-            } catch(e) {
-                updateSyncUI(false, "Local Mode");
-            }
-        }
-
         // Real-time Firestore Listener
         function subscribeToProjects() {
-            if (!currentUser || !db) return;
+            if (!currentUser) return;
             
-            // Public collection path rule applied: /artifacts/{appId}/public/data/{collectionName}
+            // Public collection path rule applied
             const projectsCol = collection(db, 'artifacts', appId, 'public', 'data', 'projects');
             
             onSnapshot(projectsCol, (snapshot) => {
@@ -500,41 +484,47 @@
                     cloudProjects.push({ id: docSnap.id, ...docSnap.data() });
                 });
 
+                // A successful snapshot confirms Firestore read access.
+                isCloudConnected = true;
+                updateSyncUI(true, "Cloud Connected");
+
                 if (cloudProjects.length > 0) {
                     window.projects = cloudProjects;
-                    // Persist to local cache as well
-                    localStorage.setItem('WEBHUB_V1_PROJECTS', JSON.stringify(cloudProjects));
                     window.renderApp();
                 } else if (window.projects && window.projects.length > 0) {
-                    // Seed initial data to cloud if remote is empty
+                    // Seed initial data to cloud if remote is empty.
                     window.projects.forEach(p => syncProjectToCloud(p));
                 }
             }, (error) => {
-                console.warn("Firestore sync fallback to Local storage:", error);
-                updateSyncUI(false, "Local Mode");
+                console.error("Firestore listener error:", error);
+                isCloudConnected = false;
+                updateSyncUI(false, "Sync Error");
             });
         }
 
         // Cloud Helper API Attached to Window
         window.syncProjectToCloud = async function(project) {
-            if (!currentUser || !isCloudConnected || !db) return;
+            if (!currentUser || !isCloudConnected) return;
             try {
                 const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'projects', project.id);
                 await setDoc(docRef, project, { merge: true });
             } catch (err) {
-                console.warn("Failed to write to cloud, cached locally:", err);
+                console.error("Error saving to cloud:", err);
             }
         };
 
         window.deleteProjectFromCloud = async function(id) {
-            if (!currentUser || !isCloudConnected || !db) return;
+            if (!currentUser || !isCloudConnected) return;
             try {
                 const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'projects', id);
                 await deleteDoc(docRef);
             } catch (err) {
-                console.warn("Failed to delete from cloud:", err);
+                console.error("Error deleting from cloud:", err);
             }
         };
+
+        // Start Auth flow
+        initAuth();
     </script>
 
     <!-- JavaScript Logic -->
