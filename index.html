@@ -407,54 +407,30 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase Configuration setup with fallback for stand-alone deployment
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'webhub-projects-default';
-        let firebaseConfig;
+        // Global Dynamic Environment Config detection
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'webhub-global-sync-v1';
         
-        try {
-            firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-                apiKey: "AIzaSyDemoKeyOnlyForFallbackDeployment123",
-                authDomain: "webhub-demo.firebaseapp.com",
-                projectId: "webhub-demo",
-                storageBucket: "webhub-demo.appspot.com",
-                messagingSenderId: "123456789",
-                appId: "1:123456789:web:abcdef123456"
+        // Auto-detect Firebase environment config or dynamically initialize cloud workspace
+        let firebaseConfig;
+        if (typeof __firebase_config !== 'undefined') {
+            try { firebaseConfig = JSON.parse(__firebase_config); } catch(e){}
+        }
+        
+        // Fallback for custom GitHub Pages deployments
+        if (!firebaseConfig || !firebaseConfig.projectId) {
+            firebaseConfig = {
+                apiKey: "AIzaSyD-PlaceholderKeyForGitHubPagesDirectDeploy",
+                authDomain: "webhub-projects-cloud.firebaseapp.com",
+                projectId: "webhub-projects-cloud",
+                storageBucket: "webhub-projects-cloud.appspot.com",
+                messagingSenderId: "102938475612",
+                appId: "1:102938475612:web:abcdef9876543210"
             };
-        } catch(e) {
-            console.warn("Using default firebase config");
         }
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
+        let app, auth, db;
         let currentUser = null;
         let isCloudConnected = false;
-
-        // Initialize Authentication
-        async function initAuth() {
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (err) {
-                console.warn("Auth initialization error, using local fallback mode:", err);
-                updateSyncUI(false, "Local Mode");
-            }
-        }
-
-        onAuthStateChanged(auth, (user) => {
-            currentUser = user;
-            if (user) {
-                isCloudConnected = true;
-                updateSyncUI(true, "Cloud Synced");
-                subscribeToProjects();
-            } else {
-                updateSyncUI(false, "Offline");
-            }
-        });
 
         function updateSyncUI(online, statusText) {
             const dot = document.getElementById('syncDot');
@@ -472,11 +448,49 @@
             }
         }
 
+        // Initialize Authentication & Firestore with safety checks
+        async function initAuth() {
+            try {
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) {
+                console.warn("Cloud connection limited to local store fallback:", err);
+                // If cloud connection fails (e.g. key domain restriction), seamless local mode handles state
+                updateSyncUI(false, "Local Mode");
+            }
+        }
+
+        if (typeof initializeApp !== 'undefined') {
+            try {
+                initAuth();
+                
+                onAuthStateChanged(auth, (user) => {
+                    currentUser = user;
+                    if (user) {
+                        isCloudConnected = true;
+                        updateSyncUI(true, "Cloud Synced");
+                        subscribeToProjects();
+                    } else {
+                        updateSyncUI(false, "Local Mode");
+                    }
+                });
+            } catch(e) {
+                updateSyncUI(false, "Local Mode");
+            }
+        }
+
         // Real-time Firestore Listener
         function subscribeToProjects() {
-            if (!currentUser) return;
+            if (!currentUser || !db) return;
             
-            // Public collection path rule applied
+            // Public collection path rule applied: /artifacts/{appId}/public/data/{collectionName}
             const projectsCol = collection(db, 'artifacts', appId, 'public', 'data', 'projects');
             
             onSnapshot(projectsCol, (snapshot) => {
@@ -487,40 +501,39 @@
 
                 if (cloudProjects.length > 0) {
                     window.projects = cloudProjects;
+                    // Persist to local cache as well
+                    localStorage.setItem('WEBHUB_V1_PROJECTS', JSON.stringify(cloudProjects));
                     window.renderApp();
                 } else if (window.projects && window.projects.length > 0) {
                     // Seed initial data to cloud if remote is empty
                     window.projects.forEach(p => syncProjectToCloud(p));
                 }
             }, (error) => {
-                console.error("Firestore listener error:", error);
-                updateSyncUI(false, "Sync Error");
+                console.warn("Firestore sync fallback to Local storage:", error);
+                updateSyncUI(false, "Local Mode");
             });
         }
 
         // Cloud Helper API Attached to Window
         window.syncProjectToCloud = async function(project) {
-            if (!currentUser || !isCloudConnected) return;
+            if (!currentUser || !isCloudConnected || !db) return;
             try {
                 const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'projects', project.id);
                 await setDoc(docRef, project, { merge: true });
             } catch (err) {
-                console.error("Error saving to cloud:", err);
+                console.warn("Failed to write to cloud, cached locally:", err);
             }
         };
 
         window.deleteProjectFromCloud = async function(id) {
-            if (!currentUser || !isCloudConnected) return;
+            if (!currentUser || !isCloudConnected || !db) return;
             try {
                 const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'projects', id);
                 await deleteDoc(docRef);
             } catch (err) {
-                console.error("Error deleting from cloud:", err);
+                console.warn("Failed to delete from cloud:", err);
             }
         };
-
-        // Start Auth flow
-        initAuth();
     </script>
 
     <!-- JavaScript Logic -->
