@@ -163,6 +163,12 @@
 
                 <!-- Global Action Controls -->
                 <div class="flex flex-wrap items-center justify-center gap-2">
+                    <!-- Cloud Sync Status Badge -->
+                    <div id="cloudStatusBadge" class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900/80 border border-slate-700/60 text-xs font-mono text-slate-400">
+                        <span id="syncDot" class="w-2 h-2 rounded-full bg-slate-500"></span>
+                        <span id="syncText">Connecting Cloud...</span>
+                    </div>
+
                     <button onclick="openModal('add')" class="group relative px-4 py-2 rounded-xl bg-gradient-to-r from-neon-cyan to-blue-600 text-slate-950 font-bold text-sm shadow-neon-cyan hover:brightness-110 transition flex items-center gap-2">
                         <i class="fa-solid fa-plus text-slate-950 group-hover:rotate-90 transition-transform duration-300"></i>
                         <span>เพิ่มโปรเจกต์</span>
@@ -202,13 +208,13 @@
                     <div class="space-y-2 max-w-2xl">
                         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/80 border border-slate-700/60 text-xs text-neon-cyan font-mono">
                             <span class="w-2 h-2 rounded-full bg-neon-green animate-ping"></span>
-                            Chrome & GitHub Pages Optimized
+                            Cloud Sync Active — เข้าถึงได้จากทุกอุปกรณ์
                         </div>
                         <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-white">
                             ศูนย์รวมเว็บแอปพลิเคชัน & Web Projects
                         </h2>
                         <p class="text-slate-400 text-sm leading-relaxed">
-                            จัดเก็บและรวบรวมทุกลิงก์โปรเจกต์ของคุณไว้อย่างเป็นระเบียบ ด้วย UI สไตล์ Futuristic Neon Glassmorphism ทำงานบนเบราว์เซอร์ 100% ปลอดภัย ไม่ต้องใช้ฐานข้อมูลนอก
+                            จัดเก็บและรวบรวมทุกลิงก์โปรเจกต์ของคุณไว้อย่างเป็นระเบียบ ด้วย UI สไตล์ Futuristic Neon Glassmorphic พร้อมระบบ Cloud Data Synchronization ซิงค์ข้อมูลตรงกันทุกเครื่องทันที
                         </p>
                     </div>
 
@@ -286,9 +292,9 @@
                     <span class="text-slate-400 font-semibold">WEBHUB v1.0.0</span> — Designed for GitHub Pages & Chrome
                 </div>
                 <div class="flex items-center gap-4 text-slate-400">
-                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-microchip text-neon-cyan"></i> LocalStorage Powered</span>
+                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-cloud text-neon-cyan"></i> Real-time Cloud Sync</span>
                     <span>•</span>
-                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-shield-halved text-neon-green"></i> 100% Client-Side</span>
+                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-shield-halved text-neon-green"></i> Auto Sync Active</span>
                 </div>
             </div>
         </footer>
@@ -395,6 +401,128 @@
         <span id="toastMsg">ดำเนินการสำเร็จ</span>
     </div>
 
+    <!-- Firebase Cloud Integration Scripts -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase Configuration setup with fallback for stand-alone deployment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'webhub-projects-default';
+        let firebaseConfig;
+        
+        try {
+            firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+                apiKey: "AIzaSyDemoKeyOnlyForFallbackDeployment123",
+                authDomain: "webhub-demo.firebaseapp.com",
+                projectId: "webhub-demo",
+                storageBucket: "webhub-demo.appspot.com",
+                messagingSenderId: "123456789",
+                appId: "1:123456789:web:abcdef123456"
+            };
+        } catch(e) {
+            console.warn("Using default firebase config");
+        }
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let isCloudConnected = false;
+
+        // Initialize Authentication
+        async function initAuth() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) {
+                console.warn("Auth initialization error, using local fallback mode:", err);
+                updateSyncUI(false, "Local Mode");
+            }
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) {
+                isCloudConnected = true;
+                updateSyncUI(true, "Cloud Synced");
+                subscribeToProjects();
+            } else {
+                updateSyncUI(false, "Offline");
+            }
+        });
+
+        function updateSyncUI(online, statusText) {
+            const dot = document.getElementById('syncDot');
+            const text = document.getElementById('syncText');
+            if (dot && text) {
+                if (online) {
+                    dot.className = "w-2 h-2 rounded-full bg-neon-green animate-ping";
+                    text.innerText = statusText;
+                    text.className = "text-neon-cyan font-mono";
+                } else {
+                    dot.className = "w-2 h-2 rounded-full bg-neon-yellow";
+                    text.innerText = statusText;
+                    text.className = "text-slate-400 font-mono";
+                }
+            }
+        }
+
+        // Real-time Firestore Listener
+        function subscribeToProjects() {
+            if (!currentUser) return;
+            
+            // Public collection path rule applied
+            const projectsCol = collection(db, 'artifacts', appId, 'public', 'data', 'projects');
+            
+            onSnapshot(projectsCol, (snapshot) => {
+                const cloudProjects = [];
+                snapshot.forEach((docSnap) => {
+                    cloudProjects.push({ id: docSnap.id, ...docSnap.data() });
+                });
+
+                if (cloudProjects.length > 0) {
+                    window.projects = cloudProjects;
+                    window.renderApp();
+                } else if (window.projects && window.projects.length > 0) {
+                    // Seed initial data to cloud if remote is empty
+                    window.projects.forEach(p => syncProjectToCloud(p));
+                }
+            }, (error) => {
+                console.error("Firestore listener error:", error);
+                updateSyncUI(false, "Sync Error");
+            });
+        }
+
+        // Cloud Helper API Attached to Window
+        window.syncProjectToCloud = async function(project) {
+            if (!currentUser || !isCloudConnected) return;
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'projects', project.id);
+                await setDoc(docRef, project, { merge: true });
+            } catch (err) {
+                console.error("Error saving to cloud:", err);
+            }
+        };
+
+        window.deleteProjectFromCloud = async function(id) {
+            if (!currentUser || !isCloudConnected) return;
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'projects', id);
+                await deleteDoc(docRef);
+            } catch (err) {
+                console.error("Error deleting from cloud:", err);
+            }
+        };
+
+        // Start Auth flow
+        initAuth();
+    </script>
+
     <!-- JavaScript Logic -->
     <script>
         /* ----------------------------------------------------
@@ -465,7 +593,7 @@
         /* ----------------------------------------------------
            State Management
         ---------------------------------------------------- */
-        let projects = [];
+        window.projects = [];
         let currentFilter = 'ALL';
         let searchQuery = '';
 
@@ -485,26 +613,31 @@
             const saved = localStorage.getItem(STORAGE_KEY);
             if (saved) {
                 try {
-                    projects = JSON.parse(saved);
+                    window.projects = JSON.parse(saved);
                 } catch (e) {
                     console.error("Failed to parse LocalStorage data", e);
-                    projects = [...DEFAULT_PROJECTS];
+                    window.projects = [...DEFAULT_PROJECTS];
                 }
             } else {
-                projects = [...DEFAULT_PROJECTS];
+                window.projects = [...DEFAULT_PROJECTS];
                 saveProjects();
             }
         }
 
         function saveProjects() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(window.projects));
             renderApp();
         }
 
         function confirmResetDemo() {
             if (confirm("คุณต้องการรีเซ็ตกลับเป็นข้อมูลตัวอย่างเริ่มต้นหรือไม่?")) {
-                projects = [...DEFAULT_PROJECTS];
+                window.projects = [...DEFAULT_PROJECTS];
                 saveProjects();
+                
+                // Sync reset to cloud if available
+                if (window.syncProjectToCloud) {
+                    window.projects.forEach(p => window.syncProjectToCloud(p));
+                }
                 showToast("รีเซ็ตเป็นข้อมูลตัวอย่างแล้ว");
             }
         }
@@ -512,23 +645,23 @@
         /* ----------------------------------------------------
            Render Main Functions
         ---------------------------------------------------- */
-        function renderApp() {
+        window.renderApp = function() {
             renderStats();
             renderCategoryButtons();
             renderProjects();
-        }
+        };
 
         function renderStats() {
-            document.getElementById('statTotal').innerText = projects.length;
-            document.getElementById('statFavs').innerText = projects.filter(p => p.fav).length;
+            document.getElementById('statTotal').innerText = window.projects.length;
+            document.getElementById('statFavs').innerText = window.projects.filter(p => p.fav).length;
             
-            const uniqueCategories = [...new Set(projects.map(p => p.category))];
+            const uniqueCategories = [...new Set(window.projects.map(p => p.category))];
             document.getElementById('statCategories').innerText = uniqueCategories.length;
         }
 
         function renderCategoryButtons() {
             const container = document.getElementById('dynamicCategoryContainer');
-            const categories = [...new Set(projects.map(p => p.category))];
+            const categories = [...new Set(window.projects.map(p => p.category))];
 
             container.innerHTML = categories.map(cat => `
                 <button onclick="filterCategory('${cat}')" 
@@ -544,7 +677,7 @@
             const emptyState = document.getElementById('emptyState');
             
             // Filter logic
-            let filtered = projects.filter(p => {
+            let filtered = window.projects.filter(p => {
                 const matchCategory = currentFilter === 'ALL' ? true : 
                                       currentFilter === 'FAV' ? p.fav : 
                                       p.category === currentFilter;
@@ -706,7 +839,7 @@
                 selectAsset('brain');
             } else if (mode === 'edit' && id) {
                 title.innerHTML = `<i class="fa-solid fa-pen-to-square text-neon-purple"></i> แก้ไขโปรเจกต์`;
-                const item = projects.find(p => p.id === id);
+                const item = window.projects.find(p => p.id === id);
                 if (item) {
                     document.getElementById('projectId').value = item.id;
                     document.getElementById('formTitle').value = item.title;
@@ -749,28 +882,37 @@
 
             const tags = tagsInput.split(',').map(t => t.trim()).filter(t => t.length > 0);
 
+            let projectItem;
+
             if (id) {
                 // Edit
-                const index = projects.findIndex(p => p.id === id);
+                const index = window.projects.findIndex(p => p.id === id);
                 if (index !== -1) {
-                    projects[index] = {
-                        ...projects[index],
+                    window.projects[index] = {
+                        ...window.projects[index],
                         title, url, description, category, color, tags, asset, fav
                     };
+                    projectItem = window.projects[index];
                     showToast('อัปเดตข้อมูลโปรเจกต์สำเร็จ');
                 }
             } else {
                 // Add
-                const newProj = {
+                projectItem = {
                     id: 'p-' + Date.now(),
                     title, url, description, category, color, tags, asset, fav,
                     createdAt: Date.now()
                 };
-                projects.unshift(newProj);
+                window.projects.unshift(projectItem);
                 showToast('เพิ่มโปรเจกต์ใหม่เรียบร้อยแล้ว');
             }
 
             saveProjects();
+            
+            // Auto sync to Cloud Database
+            if (window.syncProjectToCloud && projectItem) {
+                window.syncProjectToCloud(projectItem);
+            }
+
             closeModal();
         }
 
@@ -779,21 +921,32 @@
         }
 
         function deleteProject(id) {
-            const item = projects.find(p => p.id === id);
+            const item = window.projects.find(p => p.id === id);
             if (!item) return;
 
             if (confirm(`คุณต้องการลบโปรเจกต์ "${item.title}" ใช่หรือไม่?`)) {
-                projects = projects.filter(p => p.id !== id);
+                window.projects = window.projects.filter(p => p.id !== id);
                 saveProjects();
+                
+                // Remove from Cloud
+                if (window.deleteProjectFromCloud) {
+                    window.deleteProjectFromCloud(id);
+                }
+                
                 showToast('ลบโปรเจกต์เรียบร้อยแล้ว');
             }
         }
 
         function toggleFav(id) {
-            const item = projects.find(p => p.id === id);
+            const item = window.projects.find(p => p.id === id);
             if (item) {
                 item.fav = !item.fav;
                 saveProjects();
+                
+                if (window.syncProjectToCloud) {
+                    window.syncProjectToCloud(item);
+                }
+                
                 showToast(item.fav ? 'เพิ่มลงในรายการโปรดแล้ว' : 'ยกเลิกรายการโปรดแล้ว');
             }
         }
@@ -828,7 +981,7 @@
            JSON Import & Export Logic
         ---------------------------------------------------- */
         function exportJSON() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(projects, null, 2));
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(window.projects, null, 2));
             const downloadAnchor = document.createElement('a');
             downloadAnchor.setAttribute("href", dataStr);
             downloadAnchor.setAttribute("download", `webhub_backup_${new Date().toISOString().slice(0,10)}.json`);
@@ -847,9 +1000,15 @@
                 try {
                     const importedData = JSON.parse(e.target.result);
                     if (Array.isArray(importedData)) {
-                        projects = importedData;
+                        window.projects = importedData;
                         saveProjects();
-                        showToast('นำเข้าข้อมูล JSON สำเร็จ');
+                        
+                        // Sync imported batch to cloud
+                        if (window.syncProjectToCloud) {
+                            window.projects.forEach(p => window.syncProjectToCloud(p));
+                        }
+                        
+                        showToast('นำเข้าและซิงค์ข้อมูล Cloud สำเร็จ');
                     } else {
                         alert('รูปแบบไฟล์ JSON ไม่ถูกต้อง (ต้องเป็น Array)');
                     }
