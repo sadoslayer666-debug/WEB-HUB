@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="th" class="dark">
+<html lang="th" class="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -126,6 +126,161 @@
                 linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
                 linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
         }
+
+        /* WEBHUB refined minimal glass UI */
+        :root { color-scheme: dark; }
+        body { background-color:#080d18; background-image:
+            radial-gradient(ellipse at 12% 0%, rgba(49,91,145,.16), transparent 38%),
+            radial-gradient(ellipse at 92% 18%, rgba(93,65,145,.12), transparent 34%),
+            linear-gradient(135deg, #080d18 0%, #0b1220 55%, #080d18 100%); }
+        .bg-cyber-grid { background-image: linear-gradient(rgba(148,163,184,.025) 1px, transparent 1px), linear-gradient(90deg, rgba(148,163,184,.025) 1px, transparent 1px); background-size:36px 36px; }
+        .glass-panel { background:rgba(15,23,42,.76); border-color:rgba(148,163,184,.13); box-shadow:0 12px 40px rgba(0,0,0,.16); }
+        .glass-card { background:linear-gradient(145deg,rgba(23,34,54,.82),rgba(13,22,38,.76)); border:1px solid rgba(148,163,184,.13); box-shadow:0 8px 26px rgba(0,0,0,.13); }
+        .glass-card:hover { background:linear-gradient(145deg,rgba(29,44,68,.94),rgba(16,29,48,.9)); border-color:rgba(103,190,220,.42); transform:translateY(-3px); box-shadow:0 16px 36px rgba(0,0,0,.24); }
+        .glass-input { background:rgba(8,15,28,.72); border-color:rgba(148,163,184,.2); }
+        .glass-input:focus { border-color:#67c8e8; box-shadow:0 0 0 3px rgba(103,200,232,.1); }
+        header.glass-panel { background:rgba(8,14,26,.84); backdrop-filter:blur(22px); }
+        .asset-btn { min-height:66px; color:#a9b8ca; }
+        .asset-btn:hover { color:#8de6f5; background:rgba(30,55,78,.72); }
+        .asset-btn.selected, .asset-btn.border-neon-cyan { color:#8de6f5; background:rgba(34,94,116,.25); border-color:rgba(103,214,237,.75); box-shadow:inset 0 0 0 1px rgba(103,214,237,.12),0 0 18px rgba(0,190,220,.08); }
+        .asset-btn span { text-transform:capitalize; color:#8b9bb0; }
+        #projectsContainer .glass-card { min-height:220px; }
+        #projectsContainer .glass-card > div:first-child > div:first-child > div:first-child { background:rgba(9,17,31,.9); border-color:rgba(148,163,184,.18); color:#9bddeb; }
+        button, a, input, select, textarea { -webkit-tap-highlight-color:transparent; }
+        button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline:2px solid rgba(103,214,237,.8); outline-offset:2px; }
+        #projectModal .glass-panel { background:rgba(11,18,32,.97); }
+        #assetSelector::-webkit-scrollbar { width:5px; }
+        @media (max-width:640px) {
+            main { padding-top:1.25rem !important; }
+            #projectsContainer { gap:1rem; }
+            #projectsContainer .glass-card { min-height:unset; }
+            header { position:relative !important; }
+        }
+
+
+        /* WEBHUB Dark Vivid Cards — visual-only overrides */
+        :root { color-scheme: dark; }
+        html, body { background-color:#080d18 !important; color:#f8fafc !important; }
+        body { background-image:
+          radial-gradient(ellipse at 12% 0%, rgba(49,91,145,.18), transparent 38%),
+          radial-gradient(ellipse at 92% 18%, rgba(93,65,145,.15), transparent 34%),
+          linear-gradient(135deg,#080d18 0%,#0b1220 55%,#080d18 100%) !important; }
+        .bg-cyber-grid { background-image:linear-gradient(rgba(148,163,184,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(148,163,184,.035) 1px,transparent 1px) !important; background-size:36px 36px !important; }
+        .glass-panel, header.glass-panel, footer.glass-panel { background:rgba(15,23,42,.78) !important; border-color:rgba(148,163,184,.16) !important; color:#eaf2ff !important; box-shadow:0 12px 40px rgba(0,0,0,.2) !important; }
+        header.glass-panel { background:rgba(8,14,26,.9) !important; }
+        .glass-card { background:linear-gradient(145deg,rgba(23,34,54,.9),rgba(13,22,38,.86)) !important; border:1px solid rgba(148,163,184,.18) !important; color:#f8fafc !important; box-shadow:0 9px 26px rgba(0,0,0,.2) !important; }
+        .glass-card:hover { transform:translateY(-4px); box-shadow:0 18px 38px rgba(0,0,0,.32) !important; }
+        .glass-input { background:rgba(8,15,28,.82) !important; border-color:rgba(148,163,184,.24) !important; color:#f8fafc !important; }
+        .glass-input::placeholder { color:#94a3b8 !important; }
+        .glass-input:focus { border-color:#67d8ff !important; box-shadow:0 0 0 3px rgba(103,216,255,.16) !important; }
+        .text-white { color:#fff !important; }
+        .text-slate-100 { color:#f1f5f9 !important; }
+        .text-slate-200 { color:#e2e8f0 !important; }
+        .text-slate-300 { color:#d5deeb !important; }
+        .text-slate-400 { color:#b5c2d4 !important; }
+        .text-slate-500 { color:#91a0b5 !important; }
+        .text-slate-600 { color:#8493a8 !important; }
+        .border-slate-800, .border-slate-800\/80, .border-slate-700, .border-slate-700\/60, .border-slate-700\/50 { border-color:rgba(148,163,184,.2) !important; }
+        .bg-slate-950, .bg-slate-900, .bg-slate-900\/80, .bg-slate-900\/50, .bg-slate-900\/90 { background-color:rgba(5,12,24,.72) !important; }
+        .bg-slate-950\/60 { background-color:rgba(4,10,20,.55) !important; }
+        .bg-slate-800 { background-color:rgba(51,65,85,.72) !important; }
+        .hover\:bg-slate-800:hover { background-color:rgba(71,85,105,.8) !important; }
+        .hover\:text-white:hover { color:#fff !important; }
+        .hover\:text-slate-200:hover { color:#f1f5f9 !important; }
+        .text-neon-cyan { color:#55eaff !important; }
+        .text-neon-purple { color:#d4a2ff !important; }
+        .text-neon-pink { color:#ff8bc5 !important; }
+        .text-neon-green { color:#73f5b0 !important; }
+        .text-neon-yellow { color:#ffe477 !important; }
+        .text-glow-cyan { text-shadow:0 0 12px rgba(0,243,255,.48) !important; }
+        .text-glow-purple { text-shadow:0 0 12px rgba(176,38,255,.45) !important; }
+        .asset-btn { color:#d3deed !important; background:rgba(15,23,42,.9) !important; border-color:rgba(148,163,184,.2) !important; }
+        .asset-btn:hover { color:#fff !important; background:rgba(45,75,105,.8) !important; }
+        .asset-btn.selected, .asset-btn.border-neon-cyan { color:#7cecff !important; background:rgba(8,145,178,.2) !important; border-color:#38d9f5 !important; box-shadow:0 0 0 2px rgba(56,217,245,.12),0 0 18px rgba(0,190,220,.12) !important; }
+        .asset-btn span { color:#b5c2d4 !important; }
+        .cat-btn { color:#c0ccdc !important; }
+        .cat-btn.active, .cat-btn.border-neon-cyan { background:linear-gradient(120deg,rgba(8,145,178,.28),rgba(79,70,229,.25)) !important; border-color:#55eaff !important; color:#8ceeff !important; }
+        #projectModal { background:rgba(1,5,14,.78) !important; }
+        #projectModal .glass-panel, #modalCard { background:rgba(10,18,34,.98) !important; border-color:rgba(148,163,184,.24) !important; color:#f8fafc !important; }
+        #projectModal .bg-slate-900\/50 { background:rgba(5,12,24,.72) !important; }
+        #toast { background:rgba(10,20,36,.97) !important; color:#f8fafc !important; border-color:#38d9f5 !important; }
+        select option { background:#0b1425; color:#f8fafc; }
+        button, a, input, select, textarea { -webkit-tap-highlight-color:transparent; }
+        button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline:2px solid #67e8f9 !important; outline-offset:3px; }
+
+        /* Theme colors are applied per project from its saved formColor value */
+        #projectsContainer .glass-card.project-card-themed {
+            background:var(--card-bg) !important;
+            border:1px solid var(--card-border) !important;
+            color:var(--card-text, #fff) !important;
+            box-shadow:0 10px 28px rgba(0,0,0,.24) !important;
+        }
+        #projectsContainer .glass-card.project-card-themed:hover {
+            background:var(--card-bg) !important;
+            filter:brightness(1.12) saturate(1.12);
+            border-color:var(--card-accent) !important;
+            box-shadow:0 16px 38px color-mix(in srgb,var(--card-accent) 28%,transparent) !important;
+        }
+        #projectsContainer .project-card-themed h3,
+        #projectsContainer .project-card-themed p,
+        #projectsContainer .project-card-themed span { color:var(--card-text, #fff) !important; }
+        #projectsContainer .project-card-themed h3 { text-shadow:0 1px 2px rgba(0,0,0,.25); }
+        #projectsContainer .project-card-themed .project-icon-wrap {
+            background:rgba(3,8,18,.34) !important;
+            border:1px solid rgba(255,255,255,.28) !important;
+            color:#fff !important;
+        }
+        #projectsContainer .project-card-themed .project-category {
+            background:rgba(3,8,18,.34) !important;
+            border-color:rgba(255,255,255,.28) !important;
+            color:#fff !important;
+        }
+        #projectsContainer .project-card-themed .project-tag {
+            background:rgba(3,8,18,.28) !important;
+            border-color:rgba(255,255,255,.24) !important;
+            color:#fff !important;
+        }
+        #projectsContainer .project-card-themed .project-actions {
+            border-color:rgba(255,255,255,.28) !important;
+        }
+        #projectsContainer .project-card-themed .glass-panel {
+            background:rgba(3,8,18,.28) !important;
+            border-color:rgba(255,255,255,.28) !important;
+            color:#fff !important;
+        }
+        #projectsContainer .project-card-themed button { color:#fff !important; }
+        #projectsContainer .project-card-themed button:hover { background:rgba(255,255,255,.18) !important; }
+        #projectsContainer .project-card-themed a {
+            background:rgba(255,255,255,.94) !important;
+            border-color:rgba(255,255,255,.94) !important;
+            color:#101827 !important;
+            box-shadow:0 4px 14px rgba(0,0,0,.18);
+        }
+        #projectsContainer .project-card-themed a:hover { filter:brightness(1.08); color:#080d18 !important; }
+
+        .theme-preview {
+            min-height:58px; border-radius:12px; border:1px solid rgba(255,255,255,.25);
+            padding:10px 12px; display:flex; align-items:center; gap:10px;
+            color:#fff; font-size:11px; font-weight:700; text-shadow:0 1px 2px rgba(0,0,0,.35);
+            box-shadow:inset 0 1px 0 rgba(255,255,255,.12);
+        }
+        #formColor option { background:#0b1425; color:#f8fafc; }
+
+        /* Colorful action buttons with readable labels */
+        header button[onclick*="openModal"] { background:linear-gradient(110deg,#22d3ee,#818cf8,#e879f9) !important; color:#08111f !important; box-shadow:0 6px 22px rgba(99,102,241,.28) !important; }
+        header button[onclick*="openModal"] i, header button[onclick*="openModal"] span { color:#08111f !important; }
+        header button[onclick*="exportJSON"] { background:linear-gradient(120deg,rgba(56,189,248,.2),rgba(59,130,246,.2)) !important; border-color:#38bdf8 !important; color:#b9edff !important; }
+        header label[title*="Import"] { background:linear-gradient(120deg,rgba(52,211,153,.2),rgba(16,185,129,.18)) !important; border-color:#34d399 !important; color:#b7ffe0 !important; }
+        header button[onclick*="confirmResetDemo"] { background:linear-gradient(120deg,rgba(251,191,36,.2),rgba(249,115,22,.18)) !important; border-color:#fbbf24 !important; color:#ffe7a3 !important; }
+        #projectModal button[type="submit"] { background:linear-gradient(110deg,#22d3ee,#6366f1,#d946ef) !important; color:#fff !important; box-shadow:0 6px 20px rgba(99,102,241,.25) !important; }
+        #projectModal button[type="button"] { background:rgba(71,85,105,.35) !important; color:#e2e8f0 !important; border-color:rgba(148,163,184,.3) !important; }
+        #emptyState button { background:linear-gradient(110deg,rgba(34,211,238,.22),rgba(168,85,247,.22)) !important; border-color:#67e8f9 !important; color:#a5f3fc !important; }
+        .cat-btn.active { box-shadow:0 0 16px rgba(34,211,238,.14); }
+        ::-webkit-scrollbar-track { background:#0b1220 !important; }
+        ::-webkit-scrollbar-thumb { background:linear-gradient(180deg,#22d3ee,#a855f7) !important; border-radius:6px; }
+        ::-webkit-scrollbar-thumb:hover { background:linear-gradient(180deg,#67e8f9,#e879f9) !important; }
+        @media (max-width:640px) { .glass-panel { box-shadow:0 5px 18px rgba(0,0,0,.18) !important; } }
+
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans min-h-screen relative overflow-x-hidden bg-cyber-grid selection:bg-neon-cyan selection:text-slate-950">
@@ -351,13 +506,53 @@
                     </div>
                     <div>
                         <label class="block text-xs font-mono text-slate-300 mb-1">สี Theme Card</label>
-                        <select id="formColor" class="w-full px-4 py-2.5 rounded-xl glass-input text-sm bg-slate-900">
-                            <option value="cyan">Neon Cyan</option>
-                            <option value="purple">Neon Purple</option>
-                            <option value="pink">Neon Pink</option>
-                            <option value="green">Neon Green</option>
-                            <option value="yellow">Neon Yellow</option>
+                        <select id="formColor" onchange="updateThemePreview()" class="w-full px-4 py-2.5 rounded-xl glass-input text-sm bg-slate-900">
+                            <optgroup label="Gradient Themes">
+                                <option value="grad-cyan">Gradient · Cyber Cyan</option>
+                                <option value="grad-blue">Gradient · Electric Blue</option>
+                                <option value="grad-purple">Gradient · Ultra Violet</option>
+                                <option value="grad-pink">Gradient · Hot Pink</option>
+                                <option value="grad-red">Gradient · Crimson</option>
+                                <option value="grad-orange">Gradient · Sunset Orange</option>
+                                <option value="grad-amber">Gradient · Golden Amber</option>
+                                <option value="grad-lime">Gradient · Acid Lime</option>
+                                <option value="grad-green">Gradient · Emerald</option>
+                                <option value="grad-teal">Gradient · Tropical Teal</option>
+                                <option value="grad-aqua">Gradient · Aqua Marine</option>
+                                <option value="grad-indigo">Gradient · Deep Indigo</option>
+                                <option value="grad-magenta">Gradient · Electric Magenta</option>
+                                <option value="grad-coral">Gradient · Coral</option>
+                                <option value="grad-steel">Gradient · Steel Blue</option>
+                            </optgroup>
+                            <optgroup label="Solid Themes">
+                                <option value="solid-cyan">Solid · Cyan</option>
+                                <option value="solid-blue">Solid · Blue</option>
+                                <option value="solid-purple">Solid · Purple</option>
+                                <option value="solid-violet">Solid · Violet</option>
+                                <option value="solid-pink">Solid · Pink</option>
+                                <option value="solid-red">Solid · Red</option>
+                                <option value="solid-orange">Solid · Orange</option>
+                                <option value="solid-amber">Solid · Amber</option>
+                                <option value="solid-lime">Solid · Lime</option>
+                                <option value="solid-green">Solid · Green</option>
+                                <option value="solid-teal">Solid · Teal</option>
+                                <option value="solid-aqua">Solid · Aqua</option>
+                                <option value="solid-indigo">Solid · Indigo</option>
+                                <option value="solid-magenta">Solid · Magenta</option>
+                                <option value="solid-slate">Solid · Slate</option>
+                            </optgroup>
+                            <optgroup label="Legacy Themes (Existing Projects)">
+                                <option value="cyan">Legacy · Neon Cyan</option>
+                                <option value="purple">Legacy · Neon Purple</option>
+                                <option value="pink">Legacy · Neon Pink</option>
+                                <option value="green">Legacy · Neon Green</option>
+                                <option value="yellow">Legacy · Neon Yellow</option>
+                            </optgroup>
                         </select>
+                        <div id="themePreview" class="theme-preview mt-2" style="background:linear-gradient(135deg,#075985,#0e7490);">
+                            <i class="fa-solid fa-palette"></i>
+                            <span>ตัวอย่างสีการ์ด · Cyber Cyan</span>
+                        </div>
                     </div>
                 </div>
 
@@ -369,8 +564,9 @@
 
                 <!-- AI Asset Selector / Preset SVG Icon -->
                 <div>
-                    <label class="block text-xs font-mono text-slate-300 mb-2">เลือก AI Visual Asset (SVG Preset)</label>
-                    <div class="grid grid-cols-5 gap-2" id="assetSelector">
+                    <label class="block text-xs font-mono text-slate-300 mb-2">เลือกไอคอนโปรเจกต์</label>
+                    <p class="text-[11px] text-slate-500 mb-2">เลือกสัญลักษณ์ที่สื่อถึงโปรเจกต์ของคุณ · มีให้เลือก 32 แบบ</p>
+                    <div class="grid grid-cols-4 sm:grid-cols-6 gap-2 max-h-52 overflow-y-auto pr-1" id="assetSelector">
                         <!-- Selectable Asset Buttons Dynamic -->
                     </div>
                     <input type="hidden" id="formAsset" value="brain">
@@ -533,11 +729,38 @@
            AI SVGs & Presets (Embedded AI Assets)
         ---------------------------------------------------- */
         const AI_ASSETS = {
-            brain: `<svg class="w-full h-full text-neon-cyan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-2.04Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-2.04Z"/></svg>`,
-            chip: `<svg class="w-full h-full text-neon-purple" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9z"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 15h3M1 9h3M1 15h3"/></svg>`,
-            robot: `<svg class="w-full h-full text-neon-green" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01M9 20v2M15 20v2"/></svg>`,
-            sparkles: `<svg class="w-full h-full text-neon-pink" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4M3 5h4M19 17v4M17 19h4"/></svg>`,
-            cube: `<svg class="w-full h-full text-neon-yellow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>`
+            brain: 'fa-solid fa-brain',
+            chip: 'fa-solid fa-microchip',
+            robot: 'fa-solid fa-robot',
+            sparkles: 'fa-solid fa-wand-magic-sparkles',
+            cube: 'fa-solid fa-cube',
+            code: 'fa-solid fa-code',
+            globe: 'fa-solid fa-globe',
+            laptop: 'fa-solid fa-laptop-code',
+            mobile: 'fa-solid fa-mobile-screen-button',
+            chart: 'fa-solid fa-chart-line',
+            database: 'fa-solid fa-database',
+            cloud: 'fa-solid fa-cloud',
+            game: 'fa-solid fa-gamepad',
+            palette: 'fa-solid fa-palette',
+            image: 'fa-regular fa-image',
+            video: 'fa-solid fa-film',
+            music: 'fa-solid fa-music',
+            pdf: 'fa-solid fa-file-pdf',
+            qr: 'fa-solid fa-qrcode',
+            shield: 'fa-solid fa-shield-halved',
+            wallet: 'fa-solid fa-wallet',
+            calculator: 'fa-solid fa-calculator',
+            terminal: 'fa-solid fa-terminal',
+            rocket: 'fa-solid fa-rocket',
+            layers: 'fa-solid fa-layer-group',
+            link: 'fa-solid fa-link',
+            bolt: 'fa-solid fa-bolt',
+            camera: 'fa-solid fa-camera',
+            compass: 'fa-solid fa-compass',
+            folder: 'fa-solid fa-folder',
+            server: 'fa-solid fa-server',
+            atom: 'fa-solid fa-atom'
         };
 
         /* ----------------------------------------------------
@@ -607,6 +830,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             loadProjects();
             renderAssetSelector();
+        updateThemePreview();
             renderApp();
         });
 
@@ -676,6 +900,65 @@
             `).join('');
         }
 
+        /* ----------------------------------------------------
+           Card Theme Palette — 30 selectable themes
+           The chosen value is stored in each project's existing color field.
+        ---------------------------------------------------- */
+        const CARD_THEMES = {
+            'grad-cyan':     {name:'Cyber Cyan', bg:'linear-gradient(145deg,#075985,#0e7490)', border:'#67e8f9', accent:'#a5f3fc'},
+            'grad-blue':     {name:'Electric Blue', bg:'linear-gradient(145deg,#1d4ed8,#1e40af)', border:'#60a5fa', accent:'#bfdbfe'},
+            'grad-purple':   {name:'Ultra Violet', bg:'linear-gradient(145deg,#6d28d9,#4c1d95)', border:'#c4b5fd', accent:'#ddd6fe'},
+            'grad-pink':     {name:'Hot Pink', bg:'linear-gradient(145deg,#be185d,#831843)', border:'#f9a8d4', accent:'#fbcfe8'},
+            'grad-red':      {name:'Crimson', bg:'linear-gradient(145deg,#b91c1c,#7f1d1d)', border:'#fca5a5', accent:'#fecaca'},
+            'grad-orange':   {name:'Sunset Orange', bg:'linear-gradient(145deg,#c2410c,#7c2d12)', border:'#fdba74', accent:'#fed7aa'},
+            'grad-amber':    {name:'Golden Amber', bg:'linear-gradient(145deg,#a16207,#713f12)', border:'#fcd34d', accent:'#fde68a'},
+            'grad-lime':     {name:'Acid Lime', bg:'linear-gradient(145deg,#4d7c0f,#365314)', border:'#bef264', accent:'#d9f99d'},
+            'grad-green':    {name:'Emerald', bg:'linear-gradient(145deg,#047857,#064e3b)', border:'#6ee7b7', accent:'#a7f3d0'},
+            'grad-teal':     {name:'Tropical Teal', bg:'linear-gradient(145deg,#0f766e,#134e4a)', border:'#5eead4', accent:'#99f6e4'},
+            'grad-aqua':     {name:'Aqua Marine', bg:'linear-gradient(145deg,#0e7490,#164e63)', border:'#67e8f9', accent:'#a5f3fc'},
+            'grad-indigo':   {name:'Deep Indigo', bg:'linear-gradient(145deg,#4338ca,#312e81)', border:'#a5b4fc', accent:'#c7d2fe'},
+            'grad-magenta':  {name:'Electric Magenta', bg:'linear-gradient(145deg,#a21caf,#701a75)', border:'#f0abfc', accent:'#f5d0fe'},
+            'grad-coral':    {name:'Coral', bg:'linear-gradient(145deg,#e11d48,#9f1239)', border:'#fda4af', accent:'#fecdd3'},
+            'grad-steel':    {name:'Steel Blue', bg:'linear-gradient(145deg,#334155,#1e293b)', border:'#94a3b8', accent:'#cbd5e1'},
+
+            'solid-cyan':    {name:'Cyan', bg:'#087e9b', border:'#67e8f9', accent:'#cffafe'},
+            'solid-blue':    {name:'Blue', bg:'#2457c5', border:'#93c5fd', accent:'#dbeafe'},
+            'solid-purple':  {name:'Purple', bg:'#6632b8', border:'#c4b5fd', accent:'#ede9fe'},
+            'solid-violet':  {name:'Violet', bg:'#5141a8', border:'#c4b5fd', accent:'#e0e7ff'},
+            'solid-pink':    {name:'Pink', bg:'#b72d70', border:'#f9a8d4', accent:'#fce7f3'},
+            'solid-red':     {name:'Red', bg:'#b83232', border:'#fca5a5', accent:'#fee2e2'},
+            'solid-orange':  {name:'Orange', bg:'#bd541d', border:'#fdba74', accent:'#ffedd5'},
+            'solid-amber':   {name:'Amber', bg:'#98620b', border:'#fcd34d', accent:'#fef3c7'},
+            'solid-lime':    {name:'Lime', bg:'#557d16', border:'#bef264', accent:'#ecfccb'},
+            'solid-green':   {name:'Green', bg:'#16734b', border:'#86efac', accent:'#dcfce7'},
+            'solid-teal':    {name:'Teal', bg:'#14766f', border:'#5eead4', accent:'#ccfbf1'},
+            'solid-aqua':    {name:'Aqua', bg:'#126b85', border:'#67e8f9', accent:'#cffafe'},
+            'solid-indigo':  {name:'Indigo', bg:'#4147a5', border:'#a5b4fc', accent:'#e0e7ff'},
+            'solid-magenta': {name:'Magenta', bg:'#992d91', border:'#f0abfc', accent:'#fae8ff'},
+            'solid-slate':   {name:'Slate', bg:'#475569', border:'#cbd5e1', accent:'#f1f5f9'},
+
+            // Backward-compatible colors used by existing saved projects.
+            cyan:   {name:'Neon Cyan', bg:'linear-gradient(145deg,#075985,#0e7490)', border:'#67e8f9', accent:'#a5f3fc'},
+            purple: {name:'Neon Purple', bg:'linear-gradient(145deg,#6d28d9,#4c1d95)', border:'#c4b5fd', accent:'#ddd6fe'},
+            pink:   {name:'Neon Pink', bg:'linear-gradient(145deg,#be185d,#831843)', border:'#f9a8d4', accent:'#fbcfe8'},
+            green:  {name:'Neon Green', bg:'linear-gradient(145deg,#047857,#064e3b)', border:'#6ee7b7', accent:'#a7f3d0'},
+            yellow: {name:'Neon Yellow', bg:'linear-gradient(145deg,#a16207,#713f12)', border:'#fcd34d', accent:'#fde68a'}
+        };
+
+        function getCardTheme(themeKey) {
+            return CARD_THEMES[themeKey] || CARD_THEMES['grad-cyan'];
+        }
+
+        function updateThemePreview() {
+            const select = document.getElementById('formColor');
+            const preview = document.getElementById('themePreview');
+            if (!select || !preview) return;
+            const theme = getCardTheme(select.value);
+            preview.style.background = theme.bg;
+            preview.style.borderColor = theme.border;
+            preview.innerHTML = `<i class="fa-solid fa-palette"></i><span>ตัวอย่างสีการ์ด · ${theme.name}</span>`;
+        }
+
         function renderProjects() {
             const container = document.getElementById('projectsContainer');
             const emptyState = document.getElementById('emptyState');
@@ -708,27 +991,20 @@
             }
 
             container.innerHTML = filtered.map(p => {
-                const colorMap = {
-                    cyan: 'border-neon-cyan/30 hover:border-neon-cyan text-neon-cyan shadow-neon-cyan',
-                    purple: 'border-neon-purple/30 hover:border-neon-purple text-neon-purple shadow-neon-purple',
-                    pink: 'border-neon-pink/30 hover:border-neon-pink text-neon-pink shadow-neon-pink',
-                    green: 'border-neon-green/30 hover:border-neon-green text-neon-green',
-                    yellow: 'border-neon-yellow/30 hover:border-neon-yellow text-neon-yellow'
-                };
-
-                const glowClass = colorMap[p.color] || colorMap['cyan'];
-                const svgIcon = AI_ASSETS[p.asset] || AI_ASSETS['brain'];
+                const cardTheme = getCardTheme(p.color || 'grad-cyan');
+                const cardThemeStyle = `--card-bg:${cardTheme.bg};--card-border:${cardTheme.border};--card-accent:${cardTheme.accent};--card-text:#ffffff;`;
+                const svgIcon = `<i class="${AI_ASSETS[p.asset] || AI_ASSETS.brain} text-2xl" aria-hidden="true"></i>`;
 
                 return `
-                <div class="glass-card rounded-2xl p-5 flex flex-col justify-between relative group border transition duration-300">
+                <div class="glass-card project-card-themed rounded-2xl p-5 flex flex-col justify-between relative group border transition duration-300" style="${cardThemeStyle}">
                     <!-- Top Bar inside Card -->
                     <div class="flex items-start justify-between gap-3 mb-4">
                         <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 rounded-xl bg-slate-900/90 border border-slate-700/80 p-2.5 flex items-center justify-center shrink-0">
+                            <div class="project-icon-wrap w-12 h-12 rounded-2xl bg-slate-900/90 border border-slate-700/70 p-2.5 flex items-center justify-center shrink-0">
                                 ${svgIcon}
                             </div>
                             <div>
-                                <span class="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-slate-900 border border-slate-700 text-slate-300 font-medium inline-block mb-1">
+                                <span class="project-category text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-slate-900 border border-slate-700 text-slate-300 font-medium inline-block mb-1">
                                     ${escapeHtml(p.category)}
                                 </span>
                                 <h3 class="font-bold text-base text-white group-hover:text-neon-cyan transition line-clamp-1">
@@ -751,14 +1027,14 @@
                     <!-- Tags List -->
                     <div class="flex flex-wrap gap-1.5 mb-5">
                         ${(p.tags || []).map(tag => `
-                            <span class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-slate-950/60 border border-slate-800 text-slate-400">
+                            <span class="project-tag text-[10px] font-mono px-2 py-0.5 rounded-md bg-slate-950/60 border border-slate-800 text-slate-400">
                                 #${escapeHtml(tag.trim())}
                             </span>
                         `).join('')}
                     </div>
 
                     <!-- Card Actions -->
-                    <div class="flex items-center justify-between pt-3 border-t border-slate-800/80">
+                    <div class="project-actions flex items-center justify-between pt-3 border-t border-slate-800/80">
                         <div class="flex items-center gap-1">
                             <button onclick="editProject('${p.id}')" title="แก้ไข" class="w-8 h-8 rounded-lg glass-panel hover:bg-slate-800 text-slate-400 hover:text-neon-cyan flex items-center justify-center text-xs transition">
                                 <i class="fa-solid fa-pen"></i>
@@ -840,6 +1116,8 @@
             if (mode === 'add') {
                 title.innerHTML = `<i class="fa-solid fa-square-plus text-neon-cyan"></i> เพิ่มโปรเจกต์ใหม่`;
                 document.getElementById('projectId').value = '';
+                document.getElementById('formColor').value = 'grad-cyan';
+                updateThemePreview();
                 selectAsset('brain');
             } else if (mode === 'edit' && id) {
                 title.innerHTML = `<i class="fa-solid fa-pen-to-square text-neon-purple"></i> แก้ไขโปรเจกต์`;
@@ -850,7 +1128,8 @@
                     document.getElementById('formUrl').value = item.url;
                     document.getElementById('formDescription').value = item.description || '';
                     document.getElementById('formCategory').value = item.category;
-                    document.getElementById('formColor').value = item.color || 'cyan';
+                    document.getElementById('formColor').value = CARD_THEMES[item.color] ? item.color : 'grad-cyan';
+                    updateThemePreview();
                     document.getElementById('formTags').value = (item.tags || []).join(', ');
                     document.getElementById('formFav').checked = !!item.fav;
                     selectAsset(item.asset || 'brain');
@@ -961,9 +1240,11 @@
         function renderAssetSelector() {
             const container = document.getElementById('assetSelector');
             container.innerHTML = Object.keys(AI_ASSETS).map(key => `
-                <button type="button" onclick="selectAsset('${key}')" id="asset-btn-${key}" 
-                    class="asset-btn p-3 rounded-xl bg-slate-900 border border-slate-700 hover:border-neon-cyan flex items-center justify-center transition">
-                    <div class="w-6 h-6">${AI_ASSETS[key]}</div>
+                <button type="button" onclick="selectAsset('${key}')" id="asset-btn-${key}"
+                    title="${key.charAt(0).toUpperCase() + key.slice(1)}" aria-label="เลือกไอคอน ${key}"
+                    class="asset-btn icon-choice p-3 rounded-xl bg-slate-900/70 border border-slate-700/70 hover:border-neon-cyan flex flex-col items-center justify-center gap-2 transition">
+                    <i class="${AI_ASSETS[key]} text-lg" aria-hidden="true"></i>
+                    <span class="text-[9px] leading-none opacity-70">${key}</span>
                 </button>
             `).join('');
         }
