@@ -418,14 +418,15 @@
         
         // Fallback for custom GitHub Pages deployments
         if (!firebaseConfig || !firebaseConfig.projectId) {
-            firebaseConfig = {
-                apiKey: "AIzaSyD-PlaceholderKeyForGitHubPagesDirectDeploy",
-                authDomain: "webhub-projects-cloud.firebaseapp.com",
-                projectId: "webhub-projects-cloud",
-                storageBucket: "webhub-projects-cloud.appspot.com",
-                messagingSenderId: "102938475612",
-                appId: "1:102938475612:web:abcdef9876543210"
-            };
+            const firebaseConfig = {
+  apiKey: "AIzaSyCStZAxdOTa7v4zGxCJxzoQO8ohHThmmmg",
+  authDomain: "web-hub-5f37b.firebaseapp.com",
+  projectId: "web-hub-5f37b",
+  storageBucket: "web-hub-5f37b.firebasestorage.app",
+  messagingSenderId: "855921179660",
+  appId: "1:855921179660:web:9ad832586672061fd30229",
+  measurementId: "G-790Y8GR27Y"
+};
         }
 
         let app, auth, db;
