@@ -281,6 +281,160 @@
         ::-webkit-scrollbar-thumb:hover { background:linear-gradient(180deg,#67e8f9,#e879f9) !important; }
         @media (max-width:640px) { .glass-panel { box-shadow:0 5px 18px rgba(0,0,0,.18) !important; } }
 
+    
+        /* Mobile modal scrolling fix: keep the header visible and make the form body scrollable */
+        #projectModal {
+            overflow-y: auto;
+            overflow-x: hidden;
+            align-items: flex-start;
+            justify-content: center;
+            overscroll-behavior-y: contain;
+            -webkit-overflow-scrolling: touch;
+            padding-top: max(12px, env(safe-area-inset-top));
+            padding-bottom: max(12px, env(safe-area-inset-bottom));
+        }
+        #modalCard {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            max-height: calc(100vh - 24px);
+            max-height: calc(100dvh - max(12px, env(safe-area-inset-top)) - max(12px, env(safe-area-inset-bottom)));
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+        #modalCard > div:first-child {
+            flex: 0 0 auto;
+        }
+        #projectForm {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            overscroll-behavior-y: contain;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-y;
+            padding-bottom: max(24px, env(safe-area-inset-bottom));
+        }
+        @media (max-width: 640px) {
+            #projectModal {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+            #modalCard {
+                width: 100%;
+                max-height: calc(100vh - 20px);
+                max-height: calc(100dvh - max(10px, env(safe-area-inset-top)) - max(10px, env(safe-area-inset-bottom)));
+                border-radius: 16px;
+            }
+            #projectForm {
+                padding: 16px;
+                padding-bottom: max(28px, env(safe-area-inset-bottom));
+            }
+            #modalCard > div:first-child {
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+        }
+
+
+        /* Mobile performance tuning: preserve desktop visuals and all app behavior */
+        @media (max-width: 640px) {
+            /* Large fixed blurred ambient layers are expensive to composite on mobile GPUs. */
+            .animate-pulse-slow,
+            .blur-\[120px\],
+            .blur-\[100px\],
+            .blur-3xl {
+                animation: none !important;
+                filter: none !important;
+                -webkit-filter: none !important;
+                display: none !important;
+            }
+
+            /* Avoid repeated backdrop-filter compositing while scrolling. */
+            .glass-panel,
+            .glass-card,
+            .glass-input,
+            header.glass-panel,
+            #projectModal,
+            #projectModal .glass-panel,
+            #modalCard {
+                -webkit-backdrop-filter: none !important;
+                backdrop-filter: none !important;
+            }
+
+            /* Keep the dark glass appearance with inexpensive opaque surfaces. */
+            .glass-panel,
+            header.glass-panel,
+            footer.glass-panel {
+                background: rgba(15, 23, 42, .96) !important;
+                box-shadow: 0 3px 10px rgba(0,0,0,.16) !important;
+            }
+
+            .glass-card {
+                background: rgba(19, 31, 50, .97) !important;
+                box-shadow: 0 4px 12px rgba(0,0,0,.16) !important;
+                transition: none !important;
+                transform: none !important;
+            }
+
+            #projectsContainer .glass-card.project-card-themed {
+                box-shadow: 0 4px 12px rgba(0,0,0,.18) !important;
+                contain: layout paint;
+            }
+
+            #projectsContainer .glass-card.project-card-themed:hover,
+            .glass-card:hover {
+                transform: none !important;
+                filter: none !important;
+                box-shadow: 0 4px 12px rgba(0,0,0,.18) !important;
+            }
+
+            .glass-input {
+                background: rgba(8,15,28,.98) !important;
+                transition: none !important;
+                font-size: 16px !important;
+            }
+
+            button, a, label, input, select, textarea {
+                transition-duration: 0s !important;
+                animation-duration: 0s !important;
+            }
+
+            .text-glow-cyan,
+            .text-glow-purple {
+                text-shadow: none !important;
+            }
+
+            .cat-btn,
+            .asset-btn,
+            #projectsContainer button,
+            #projectsContainer a {
+                box-shadow: none !important;
+            }
+
+            /* Reduce scroll work without changing layout or functionality. */
+            html {
+                scroll-behavior: auto !important;
+                -webkit-text-size-adjust: 100%;
+            }
+            body {
+                background-image: linear-gradient(135deg,#080d18 0%,#0b1220 55%,#080d18 100%) !important;
+                background-attachment: scroll !important;
+            }
+            #projectsContainer {
+                content-visibility: auto;
+                contain-intrinsic-size: 1px 900px;
+            }
+        }
+
+        @media (max-width: 640px) and (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation: none !important;
+                transition: none !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans min-h-screen relative overflow-x-hidden bg-cyber-grid selection:bg-neon-cyan selection:text-slate-950">
