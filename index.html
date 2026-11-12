@@ -435,6 +435,14 @@
             }
         }
 
+        .webhub-extra-modal { overflow-y:auto; overscroll-behavior:contain; }
+        .webhub-extra-modal.is-open { opacity:1; pointer-events:auto; }
+        .password-setting-row { background:rgba(15,23,42,.72); border:1px solid rgba(100,116,139,.28); border-radius:14px; padding:13px; }
+        .password-setting-row input { min-width:0; background:rgba(2,6,23,.8); border:1px solid rgba(100,116,139,.45); color:#f8fafc; }
+        @media(max-width:640px) {
+            .webhub-extra-modal { align-items:flex-start; padding:12px; }
+            .webhub-extra-panel { margin-top:auto; margin-bottom:auto; max-height:calc(100dvh - 24px); }
+        }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans min-h-screen relative overflow-x-hidden bg-cyber-grid selection:bg-neon-cyan selection:text-slate-950">
@@ -484,6 +492,12 @@
                     </button>
 
                     <div class="h-6 w-[1px] bg-slate-700/60 mx-1 hidden sm:block"></div>
+
+                    <!-- Link Password Settings -->
+                    <button onclick="openSettingsModal()" title="ตั้งค่ารหัสผ่านสำหรับ Link" class="px-3 py-2 rounded-xl glass-panel hover:bg-slate-800 text-slate-300 hover:text-amber-300 border border-slate-700 text-sm transition flex items-center gap-2">
+                        <i class="fa-solid fa-gear text-xs"></i>
+                        <span class="hidden md:inline">Settings</span>
+                    </button>
 
                     <!-- JSON Export -->
                     <button onclick="exportJSON()" title="Export เป็นไฟล์ JSON" class="px-3 py-2 rounded-xl glass-panel hover:bg-slate-800 text-slate-300 hover:text-neon-cyan border border-slate-700 text-sm transition flex items-center gap-2">
@@ -745,6 +759,68 @@
         </div>
     </div>
 
+    <!-- Admin Authentication Modal -->
+    <div id="adminAuthModal" class="webhub-extra-modal fixed inset-0 z-[80] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-200">
+        <section class="webhub-extra-panel glass-panel w-full max-w-sm rounded-2xl border border-amber-400/40 shadow-2xl overflow-hidden">
+            <header class="px-5 pt-5 text-center">
+                <div class="mx-auto w-14 h-14 rounded-2xl bg-amber-400/10 border border-amber-300/30 flex items-center justify-center text-amber-300 text-2xl"><i class="fa-solid fa-user-shield"></i></div>
+                <h3 class="font-bold text-lg text-white mt-3">ADMIN AUTHENTICATION</h3>
+                <p class="text-xs text-slate-400 mt-1">กรอกรหัส Admin เพื่อเข้าสู่ Settings</p>
+            </header>
+            <form id="adminAuthForm" onsubmit="submitAdminPassword(event)" class="p-5 space-y-3">
+                <input id="adminPasswordInput" type="password" inputmode="numeric" autocomplete="off" required placeholder="รหัส Admin" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-700 text-white text-sm outline-none focus:border-amber-300" />
+                <p id="adminPasswordError" class="hidden text-xs text-red-400" role="alert">รหัส Admin ไม่ถูกต้อง</p>
+                <div class="flex gap-2">
+                    <button type="button" onclick="closeAdminAuthModal()" class="flex-1 px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 text-xs">ยกเลิก</button>
+                    <button type="submit" class="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 font-bold text-xs"><i class="fa-solid fa-unlock-keyhole mr-1"></i> เข้าสู่ Settings</button>
+                </div>
+            </form>
+        </section>
+    </div>
+
+    <!-- Link Password Settings Modal -->
+    <div id="settingsModal" class="webhub-extra-modal fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-200">
+        <section class="webhub-extra-panel glass-panel w-full max-w-2xl max-h-[88vh] rounded-2xl border border-slate-700/80 shadow-2xl overflow-hidden flex flex-col">
+            <header class="flex items-center justify-between gap-3 px-5 py-4 border-b border-slate-800 bg-slate-900/70">
+                <div>
+                    <h3 class="font-bold text-lg text-white flex items-center gap-2"><i class="fa-solid fa-shield-halved text-amber-300"></i> Link Password Settings</h3>
+                    <p class="text-[11px] text-slate-400 mt-1">กำหนดรหัสผ่านแยกเป็นราย Link</p>
+                </div>
+                <button type="button" onclick="closeSettingsModal()" aria-label="Close settings" class="w-9 h-9 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"><i class="fa-solid fa-xmark"></i></button>
+            </header>
+            <div class="p-4 sm:p-5 overflow-y-auto overscroll-contain" style="-webkit-overflow-scrolling:touch;">
+                <div class="rounded-xl border border-amber-400/20 bg-amber-400/5 p-3 mb-4">
+                    <p class="text-xs text-amber-100 font-semibold"><i class="fa-solid fa-circle-info mr-1"></i> วิธีใช้งาน</p>
+                    <p class="text-[11px] text-slate-400 mt-1 leading-relaxed">กรอกรหัสผ่านในรายการที่ต้องการล็อก แล้วกดบันทึก เมื่อกดเปิด Link จะมีหน้าต่างถามรหัสผ่านก่อนเปิดเว็บไซต์ ส่วน Link ที่ไม่ตั้งรหัสผ่านจะเปิดได้ตามปกติ</p>
+                </div>
+                <div id="passwordSettingsList" class="space-y-3"></div>
+                <p class="text-[10px] text-slate-500 mt-4 leading-relaxed">หมายเหตุ: ระบบนี้เป็นด่านยืนยันก่อนเปิด Link ผ่าน WEBHUB เท่านั้น ไม่ได้ป้องกันการนำ URL ไปเปิดโดยตรง</p>
+            </div>
+            <footer class="px-5 py-3 border-t border-slate-800 flex justify-end">
+                <button type="button" onclick="closeSettingsModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs">ปิดหน้าต่าง</button>
+            </footer>
+        </section>
+    </div>
+
+    <!-- Password Unlock Modal -->
+    <div id="linkPasswordModal" class="webhub-extra-modal fixed inset-0 z-[70] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-200">
+        <section class="webhub-extra-panel glass-panel w-full max-w-sm rounded-2xl border border-amber-400/40 shadow-2xl overflow-hidden">
+            <header class="px-5 pt-5 text-center">
+                <div class="mx-auto w-14 h-14 rounded-2xl bg-amber-400/10 border border-amber-300/30 flex items-center justify-center text-amber-300 text-2xl"><i class="fa-solid fa-lock"></i></div>
+                <h3 class="font-bold text-lg text-white mt-3">PASSWORD REQUIRED</h3>
+                <p id="passwordPromptProject" class="text-xs text-slate-400 mt-1">Link นี้ถูกป้องกันด้วยรหัสผ่าน</p>
+            </header>
+            <form id="linkPasswordForm" onsubmit="submitLinkPassword(event)" class="p-5 space-y-3">
+                <input id="linkPasswordInput" type="password" required autocomplete="current-password" placeholder="กรอกรหัสผ่าน" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-700 text-white text-sm outline-none focus:border-amber-300" />
+                <p id="linkPasswordError" class="hidden text-xs text-red-400" role="alert">รหัสผ่านไม่ถูกต้อง</p>
+                <div class="flex gap-2">
+                    <button type="button" onclick="closeLinkPasswordModal()" class="flex-1 px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 text-xs">ยกเลิก</button>
+                    <button type="submit" class="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 font-bold text-xs"><i class="fa-solid fa-unlock-keyhole mr-1"></i> ยืนยันและเปิดเว็บ</button>
+                </div>
+            </form>
+        </section>
+    </div>
+
     <!-- Notification Toast -->
     <div id="toast" class="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-xl glass-panel border border-neon-cyan text-white text-xs font-semibold shadow-neon-cyan translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
         <i class="fa-solid fa-circle-check text-neon-cyan text-base" id="toastIcon"></i>
@@ -986,6 +1062,10 @@
             renderAssetSelector();
         updateThemePreview();
             renderApp();
+            document.getElementById('projectsContainer').addEventListener('click', (event) => {
+                const trigger = event.target.closest('[data-open-project]');
+                if (trigger) requestProjectOpen(trigger.dataset.openProject);
+            });
         });
 
         /* ----------------------------------------------------
@@ -1199,15 +1279,204 @@
                         </div>
 
                         <!-- Launch Web Button -->
-                        <a href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer" 
+                        <button type="button" data-open-project="${escapeHtml(String(p.id))}"
                            class="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-neon-cyan hover:text-slate-950 text-neon-cyan border border-neon-cyan/30 text-xs font-semibold flex items-center gap-2 transition duration-200">
+                            ${p.accessPasswordHash ? '<i class="fa-solid fa-lock text-amber-300 text-[10px]"></i>' : ''}
                             <span>เปิดเว็บ</span>
                             <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
-                        </a>
+                        </button>
                     </div>
                 </div>
                 `;
             }).join('');
+        }
+
+        /* ----------------------------------------------------
+           Per-Link Password Settings & Unlock Flow
+        ---------------------------------------------------- */
+        let pendingProtectedProjectId = null;
+
+        // Admin password is checked as a SHA-256 digest instead of being kept as plain text.
+        // This is a client-side access gate, not server-side authorization.
+        const ADMIN_PASSWORD_SHA256 = '94edf28c6d6da38fd35d7ad53e485307f89fbeaf120485c8d17a43f323deee71';
+
+        function openSettingsModal() {
+            const authModal = document.getElementById('adminAuthModal');
+            const input = document.getElementById('adminPasswordInput');
+            const error = document.getElementById('adminPasswordError');
+            document.getElementById('adminAuthForm').reset();
+            error.classList.add('hidden');
+            authModal.classList.add('is-open');
+            setTimeout(() => input.focus(), 80);
+        }
+
+        function closeAdminAuthModal() {
+            document.getElementById('adminAuthModal').classList.remove('is-open');
+            document.getElementById('adminAuthForm').reset();
+        }
+
+        async function submitAdminPassword(event) {
+            event.preventDefault();
+            const input = document.getElementById('adminPasswordInput');
+            const error = document.getElementById('adminPasswordError');
+            try {
+                const bytes = new TextEncoder().encode(input.value);
+                const digest = await crypto.subtle.digest('SHA-256', bytes);
+                const actualHash = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+                if (actualHash !== ADMIN_PASSWORD_SHA256) {
+                    error.textContent = 'รหัส Admin ไม่ถูกต้อง';
+                    error.classList.remove('hidden');
+                    input.select();
+                    return;
+                }
+                closeAdminAuthModal();
+                renderPasswordSettings();
+                document.getElementById('settingsModal').classList.add('is-open');
+            } catch (err) {
+                console.error('Admin password verification failed:', err);
+                error.textContent = 'เบราว์เซอร์ไม่รองรับการตรวจสอบรหัสผ่าน';
+                error.classList.remove('hidden');
+            }
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settingsModal').classList.remove('is-open');
+        }
+
+        function renderPasswordSettings() {
+            const list = document.getElementById('passwordSettingsList');
+            if (!window.projects.length) {
+                list.innerHTML = '<div class="text-center text-slate-500 text-sm py-8">ยังไม่มี Link ใน WEBHUB</div>';
+                return;
+            }
+            list.innerHTML = window.projects.map(project => `
+                <article class="password-setting-row" data-password-row="${escapeHtml(String(project.id))}">
+                    <div class="flex items-start justify-between gap-3 mb-3">
+                        <div class="min-w-0">
+                            <h4 class="text-sm font-semibold text-white truncate">${escapeHtml(project.title || 'Untitled Link')}</h4>
+                            <p class="text-[10px] text-slate-500 font-mono truncate mt-1">${escapeHtml(project.url || '')}</p>
+                        </div>
+                        <span class="shrink-0 text-[10px] px-2 py-1 rounded-full ${project.accessPasswordHash ? 'bg-amber-400/10 text-amber-300 border border-amber-300/20' : 'bg-emerald-400/10 text-emerald-300 border border-emerald-300/20'}">${project.accessPasswordHash ? 'LOCKED' : 'UNLOCKED'}</span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <input type="password" autocomplete="new-password" data-password-input="${escapeHtml(String(project.id))}" placeholder="${project.accessPasswordHash ? 'กรอกรหัสผ่านใหม่เพื่อเปลี่ยน' : 'ตั้งรหัสผ่านสำหรับ Link นี้'}" class="flex-1 min-w-0 px-3 py-2 rounded-lg text-xs outline-none focus:border-amber-300" />
+                        <div class="flex gap-2">
+                            <button type="button" data-password-action="save" data-project-id="${escapeHtml(String(project.id))}" class="flex-1 sm:flex-none px-3 py-2 rounded-lg bg-amber-400/15 border border-amber-300/30 text-amber-200 text-xs hover:bg-amber-400/25">${project.accessPasswordHash ? 'เปลี่ยนรหัส' : 'ตั้งรหัส'}</button>
+                            ${project.accessPasswordHash ? `<button type="button" data-password-action="remove" data-project-id="${escapeHtml(String(project.id))}" class="flex-1 sm:flex-none px-3 py-2 rounded-lg bg-red-500/10 border border-red-400/25 text-red-300 text-xs hover:bg-red-500/20">ยกเลิกรหัส</button>` : ''}
+                        </div>
+                    </div>
+                </article>
+            `).join('');
+
+            list.querySelectorAll('[data-password-action]').forEach(button => {
+                button.addEventListener('click', () => {
+                    const id = button.dataset.projectId;
+                    if (button.dataset.passwordAction === 'save') saveLinkPassword(id);
+                    if (button.dataset.passwordAction === 'remove') removeLinkPassword(id);
+                });
+            });
+        }
+
+        async function hashLinkPassword(password, salt) {
+            if (!window.crypto || !crypto.subtle) throw new Error('Web Crypto API is unavailable');
+            const bytes = new TextEncoder().encode(`${salt}:${password}`);
+            const digest = await crypto.subtle.digest('SHA-256', bytes);
+            return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+        }
+
+        function createPasswordSalt() {
+            const bytes = new Uint8Array(16);
+            crypto.getRandomValues(bytes);
+            return Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function saveLinkPassword(id) {
+            const project = window.projects.find(item => String(item.id) === String(id));
+            const input = Array.from(document.querySelectorAll('[data-password-input]')).find(el => el.dataset.passwordInput === String(id));
+            if (!project || !input) return;
+            const password = input.value;
+            if (!password) { showToast('กรุณากรอกรหัสผ่านก่อนบันทึก'); input.focus(); return; }
+            if (password.length < 4) { showToast('รหัสผ่านต้องมีอย่างน้อย 4 ตัวอักษร'); input.focus(); return; }
+            try {
+                const salt = createPasswordSalt();
+                project.accessPasswordSalt = salt;
+                project.accessPasswordHash = await hashLinkPassword(password, salt);
+                saveProjects();
+                if (window.syncProjectToCloud) await window.syncProjectToCloud(project);
+                renderPasswordSettings();
+                showToast(`ตั้งรหัสผ่านให้ ${project.title} แล้ว`);
+            } catch (error) {
+                console.error('Unable to save link password:', error);
+                showToast('ตั้งรหัสผ่านไม่สำเร็จ: เบราว์เซอร์ไม่รองรับ Web Crypto');
+            }
+        }
+
+        async function removeLinkPassword(id) {
+            const project = window.projects.find(item => String(item.id) === String(id));
+            if (!project || !project.accessPasswordHash) return;
+            if (!confirm(`ยกเลิกรหัสผ่านของ "${project.title}" ใช่หรือไม่?`)) return;
+            // Use null so Firestore merge writes clear any previous protection fields.
+            project.accessPasswordHash = null;
+            project.accessPasswordSalt = null;
+            saveProjects();
+            if (window.syncProjectToCloud) await window.syncProjectToCloud(project);
+            renderPasswordSettings();
+            showToast('ยกเลิกรหัสผ่านเรียบร้อยแล้ว');
+        }
+
+        function requestProjectOpen(id) {
+            const project = window.projects.find(item => String(item.id) === String(id));
+            if (!project || !project.url) return;
+            if (!project.accessPasswordHash) {
+                window.open(project.url, '_blank', 'noopener,noreferrer');
+                return;
+            }
+            pendingProtectedProjectId = project.id;
+            document.getElementById('passwordPromptProject').textContent = project.title || 'Link นี้ถูกป้องกันด้วยรหัสผ่าน';
+            document.getElementById('linkPasswordInput').value = '';
+            document.getElementById('linkPasswordError').classList.add('hidden');
+            document.getElementById('linkPasswordModal').classList.add('is-open');
+            setTimeout(() => document.getElementById('linkPasswordInput').focus(), 80);
+        }
+
+        function closeLinkPasswordModal() {
+            document.getElementById('linkPasswordModal').classList.remove('is-open');
+            document.getElementById('linkPasswordForm').reset();
+            pendingProtectedProjectId = null;
+        }
+
+        async function submitLinkPassword(event) {
+            event.preventDefault();
+            const project = window.projects.find(item => String(item.id) === String(pendingProtectedProjectId));
+            const input = document.getElementById('linkPasswordInput');
+            const error = document.getElementById('linkPasswordError');
+            if (!project || !project.accessPasswordHash || !input.value) return;
+
+            // Open a temporary tab during the user gesture; navigate it only after validation.
+            const destinationTab = window.open('about:blank', '_blank');
+            if (!destinationTab) {
+                error.textContent = 'เบราว์เซอร์บล็อกหน้าต่างใหม่ กรุณาอนุญาต Pop-ups สำหรับ WEBHUB';
+                error.classList.remove('hidden');
+                return;
+            }
+            try {
+                const candidate = await hashLinkPassword(input.value, project.accessPasswordSalt || '');
+                if (candidate === project.accessPasswordHash) {
+                    destinationTab.opener = null;
+                    destinationTab.location.replace(project.url);
+                    closeLinkPasswordModal();
+                } else {
+                    destinationTab.close();
+                    error.textContent = 'รหัสผ่านไม่ถูกต้อง กรุณาลองอีกครั้ง';
+                    error.classList.remove('hidden');
+                    input.select();
+                }
+            } catch (err) {
+                destinationTab.close();
+                console.error('Password verification failed:', err);
+                error.textContent = 'ตรวจสอบรหัสผ่านไม่สำเร็จ';
+                error.classList.remove('hidden');
+            }
         }
 
         /* ----------------------------------------------------
