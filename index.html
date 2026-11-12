@@ -765,14 +765,14 @@
             <header class="px-5 pt-5 text-center">
                 <div class="mx-auto w-14 h-14 rounded-2xl bg-amber-400/10 border border-amber-300/30 flex items-center justify-center text-amber-300 text-2xl"><i class="fa-solid fa-user-shield"></i></div>
                 <h3 class="font-bold text-lg text-white mt-3">ADMIN AUTHENTICATION</h3>
-                <p class="text-xs text-slate-400 mt-1">กรอกรหัส Admin เพื่อเข้าสู่ Settings</p>
+                <p id="adminAuthDescription" class="text-xs text-slate-400 mt-1">กรอกรหัส Admin เพื่อยืนยันการดำเนินการ</p>
             </header>
             <form id="adminAuthForm" onsubmit="submitAdminPassword(event)" class="p-5 space-y-3">
                 <input id="adminPasswordInput" type="password" inputmode="numeric" autocomplete="off" required placeholder="รหัส Admin" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-700 text-white text-sm outline-none focus:border-amber-300" />
                 <p id="adminPasswordError" class="hidden text-xs text-red-400" role="alert">รหัส Admin ไม่ถูกต้อง</p>
                 <div class="flex gap-2">
                     <button type="button" onclick="closeAdminAuthModal()" class="flex-1 px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 text-xs">ยกเลิก</button>
-                    <button type="submit" class="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 font-bold text-xs"><i class="fa-solid fa-unlock-keyhole mr-1"></i> เข้าสู่ Settings</button>
+                    <button id="adminAuthSubmit" type="submit" class="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 font-bold text-xs"><i class="fa-solid fa-unlock-keyhole mr-1"></i> ยืนยัน</button>
                 </div>
             </form>
         </section>
@@ -1300,19 +1300,41 @@
         // This is a client-side access gate, not server-side authorization.
         const ADMIN_PASSWORD_SHA256 = '94edf28c6d6da38fd35d7ad53e485307f89fbeaf120485c8d17a43f323deee71';
 
-        function openSettingsModal() {
+        // A fresh Admin password check is required for every protected action.
+        // This client-side gate is a convenience barrier, not server-side authorization.
+        let pendingAdminAction = null;
+        let settingsAdminVerified = false;
+        let editAdminVerified = false;
+
+        function requestAdminAuth(action, payload = null) {
+            pendingAdminAction = { action, payload };
             const authModal = document.getElementById('adminAuthModal');
             const input = document.getElementById('adminPasswordInput');
             const error = document.getElementById('adminPasswordError');
+            const description = document.getElementById('adminAuthDescription');
+            const submit = document.getElementById('adminAuthSubmit');
+            const labels = {
+                settings: ['กรอกรหัส Admin เพื่อเข้าสู่ Settings', 'เข้าสู่ Settings'],
+                edit: ['กรอกรหัส Admin ก่อนแก้ไขโปรเจกต์', 'ยืนยันและแก้ไข'],
+                delete: ['กรอกรหัส Admin ก่อนลบโปรเจกต์', 'ยืนยันการลบ']
+            };
+            const [message, buttonText] = labels[action] || ['กรอกรหัส Admin เพื่อยืนยัน', 'ยืนยัน'];
+            description.textContent = message;
+            submit.innerHTML = `<i class="fa-solid fa-unlock-keyhole mr-1"></i> ${buttonText}`;
             document.getElementById('adminAuthForm').reset();
             error.classList.add('hidden');
             authModal.classList.add('is-open');
             setTimeout(() => input.focus(), 80);
         }
 
+        function openSettingsModal() {
+            requestAdminAuth('settings');
+        }
+
         function closeAdminAuthModal() {
             document.getElementById('adminAuthModal').classList.remove('is-open');
             document.getElementById('adminAuthForm').reset();
+            pendingAdminAction = null;
         }
 
         async function submitAdminPassword(event) {
@@ -1329,9 +1351,21 @@
                     input.select();
                     return;
                 }
+
+                const approvedAction = pendingAdminAction;
                 closeAdminAuthModal();
-                renderPasswordSettings();
-                document.getElementById('settingsModal').classList.add('is-open');
+                if (!approvedAction) return;
+
+                if (approvedAction.action === 'settings') {
+                    settingsAdminVerified = true;
+                    renderPasswordSettings();
+                    document.getElementById('settingsModal').classList.add('is-open');
+                } else if (approvedAction.action === 'edit') {
+                    editAdminVerified = true;
+                    openModal('edit', approvedAction.payload);
+                } else if (approvedAction.action === 'delete') {
+                    performProjectDelete(approvedAction.payload);
+                }
             } catch (err) {
                 console.error('Admin password verification failed:', err);
                 error.textContent = 'เบราว์เซอร์ไม่รองรับการตรวจสอบรหัสผ่าน';
@@ -1341,6 +1375,7 @@
 
         function closeSettingsModal() {
             document.getElementById('settingsModal').classList.remove('is-open');
+            settingsAdminVerified = false;
         }
 
         function renderPasswordSettings() {
@@ -1391,6 +1426,7 @@
         }
 
         async function saveLinkPassword(id) {
+            if (!settingsAdminVerified) { showToast('กรุณายืนยันรหัส Admin ก่อน'); return; }
             const project = window.projects.find(item => String(item.id) === String(id));
             const input = Array.from(document.querySelectorAll('[data-password-input]')).find(el => el.dataset.passwordInput === String(id));
             if (!project || !input) return;
@@ -1412,6 +1448,7 @@
         }
 
         async function removeLinkPassword(id) {
+            if (!settingsAdminVerified) { showToast('กรุณายืนยันรหัส Admin ก่อน'); return; }
             const project = window.projects.find(item => String(item.id) === String(id));
             if (!project || !project.accessPasswordHash) return;
             if (!confirm(`ยกเลิกรหัสผ่านของ "${project.title}" ใช่หรือไม่?`)) return;
@@ -1571,12 +1608,18 @@
             modal.classList.add('opacity-0', 'pointer-events-none');
             card.classList.remove('scale-100');
             card.classList.add('scale-95');
+            editAdminVerified = false;
         }
 
         function handleFormSubmit(e) {
             e.preventDefault();
 
             const id = document.getElementById('projectId').value;
+            if (id && !editAdminVerified) {
+                closeModal();
+                requestAdminAuth('edit', id);
+                return;
+            }
             const title = document.getElementById('formTitle').value.trim();
             const url = document.getElementById('formUrl').value.trim();
             const description = document.getElementById('formDescription').value.trim();
@@ -1620,27 +1663,27 @@
             }
 
             closeModal();
+            if (id) editAdminVerified = false;
         }
 
         function editProject(id) {
-            openModal('edit', id);
+            if (!window.projects.some(p => String(p.id) === String(id))) return;
+            requestAdminAuth('edit', id);
         }
 
         function deleteProject(id) {
-            const item = window.projects.find(p => p.id === id);
-            if (!item) return;
+            if (!window.projects.some(p => String(p.id) === String(id))) return;
+            requestAdminAuth('delete', id);
+        }
 
-            if (confirm(`คุณต้องการลบโปรเจกต์ "${item.title}" ใช่หรือไม่?`)) {
-                window.projects = window.projects.filter(p => p.id !== id);
-                saveProjects();
-                
-                // Remove from Cloud
-                if (window.deleteProjectFromCloud) {
-                    window.deleteProjectFromCloud(id);
-                }
-                
-                showToast('ลบโปรเจกต์เรียบร้อยแล้ว');
-            }
+        function performProjectDelete(id) {
+            const item = window.projects.find(p => String(p.id) === String(id));
+            if (!item) return;
+            if (!confirm(`คุณต้องการลบโปรเจกต์ "${item.title}" ใช่หรือไม่?`)) return;
+            window.projects = window.projects.filter(p => String(p.id) !== String(id));
+            saveProjects();
+            if (window.deleteProjectFromCloud) window.deleteProjectFromCloud(id);
+            showToast('ลบโปรเจกต์เรียบร้อยแล้ว');
         }
 
         function toggleFav(id) {
